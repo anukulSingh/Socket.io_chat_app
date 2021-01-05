@@ -20,7 +20,7 @@ io.on('connection', (socket) => {
   console.log('New webSocket connection');
 
   socket.emit('message','Welcome!');
-  socket.broadcast.emit('message','A new user has joined!')
+  socket.broadcast.emit('message','A new user has joined!') //emits to all except itself
 
   socket.on('sendMessage',(message,callback) => {
     const filter = new Filter()
