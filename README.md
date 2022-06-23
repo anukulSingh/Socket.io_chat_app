@@ -4,4 +4,3 @@
 
 ### Deployed on Heroku
 
-[Try is out !](https://chat-pot.herokuapp.com/)
