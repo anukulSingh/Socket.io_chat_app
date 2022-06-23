@@ -37,6 +37,17 @@ const autoScroll = () => {
     }
 }
 
+window.addEventListener('DOMContentLoaded', () => {
+    const button = document.querySelector('#emoji-button');
+    const picker = new EmojiButton();
+    picker.on('emoji', emoji => {
+      document.querySelector('#message-input').value += emoji;
+    });
+    button.addEventListener('click', () => {
+      picker.pickerVisible ? picker.hidePicker() : picker.showPicker(button);
+    });
+});
+
 socket.on('message',(message) => {
     console.log(message);
     const html = Mustache.render(messageTemplate, {
@@ -74,8 +85,10 @@ $messageForm.addEventListener('submit', (e) => {
 
     //disabled button
     const message = e.target.elements.message.value;
+    const ciphertext = CryptoJS.AES.encrypt(message, "436grdfgf5t45gr").toString();
+    console.log(ciphertext)
 
-    socket.emit('sendMessage',message, (error) => {
+    socket.emit('sendMessage',ciphertext, (error) => {
         $messageFormButton.removeAttribute('disabled')
         $messageFormInput.value = ''
         $messageFormInput.focus()
@@ -93,12 +106,14 @@ $locationButton.addEventListener('click',() => {
 
     $locationButton.setAttribute('disabled', 'disabled')
 
-
+    
     navigator.geolocation.getCurrentPosition((position) => {
-        socket.emit('sendLocation',{
+        const locationdata = {
             longitude: position.coords.longitude,
             latitude: position.coords.latitude
-        }, () => {
+        }
+        const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(locationdata), "436grdfgf5t45gr").toString();
+        socket.emit('sendLocation', ciphertext, () => {
             $locationButton.removeAttribute('disabled')
             console.log('Location shared..');
         })

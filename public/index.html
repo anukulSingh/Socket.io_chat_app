@@ -10,9 +10,9 @@
     <div class="centered-form">
         <div class="centered-form__box">
             <h1>Join</h1>
-            <form action="/chat.html">
-              <input type="text" name="username" placeholder="Display name" required>
-              <input type="text" name="room" placeholder="Room" required>
+            <form action="/chat.html" autocomplete="off">
+              <input type="text" name="username" placeholder="Display name" min="3" max="10" required>
+              <input type="text" name="room" placeholder="Room" min="1" max="20" required>
               <button>Join</button>
             </form> 
         </div>
