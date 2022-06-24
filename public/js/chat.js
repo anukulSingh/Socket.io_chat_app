@@ -49,10 +49,11 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 socket.on('message',(message) => {
-    console.log(message);
+    const decryptedText = CryptoJS.AES.decrypt(message.text, "436grdfgf5t45gr").toString(CryptoJS.enc.Utf8)
+
     const html = Mustache.render(messageTemplate, {
         username: message.username,
-        message: message.text,
+        message: decryptedText,
         createdAt: moment(message.createdAt).format('h:mm a')
     })
     $messages.insertAdjacentHTML('beforeend', html)
@@ -60,10 +61,11 @@ socket.on('message',(message) => {
 })
 
 socket.on('locationMessage', (message) => {
-    console.log(message)
+    const coords = JSON.parse(CryptoJS.AES.decrypt(message.url, "436grdfgf5t45gr").toString(CryptoJS.enc.Utf8))
+    const url = `https://google.com/maps?q=${coords.latitude},${coords.longitude}`
     const html = Mustache.render(locationTemplate, {
         username: message.username,
-        url: message.url,
+        url: url,
         createdAt: moment(message.createdAt).format('h:mm a')
     })
     $messages.insertAdjacentHTML('beforeend', html)
@@ -86,7 +88,6 @@ $messageForm.addEventListener('submit', (e) => {
     //disabled button
     const message = e.target.elements.message.value;
     const ciphertext = CryptoJS.AES.encrypt(message, "436grdfgf5t45gr").toString();
-    console.log(ciphertext)
 
     socket.emit('sendMessage',ciphertext, (error) => {
         $messageFormButton.removeAttribute('disabled')

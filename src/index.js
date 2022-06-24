@@ -25,6 +25,8 @@ const PORT = process.env.PORT || 3000
 const PublicDirectoryPath = path.join(__dirname,'../public');
 
 
+app.set("view engine", "mustache");
+
 // set security headers
 app.use(helmet({
   contentSecurityPolicy: false
@@ -53,7 +55,6 @@ app.use(express.static(PublicDirectoryPath))
 // socket.emit, io.emit, socket.broadcast.emit
 // io.to.emit, spcket.broadcast.to.emit
 io.on('connection', (socket) => {
-  console.log('New webSocket connection');
 
 
   socket.on('join', (options, callback) => {
@@ -66,8 +67,12 @@ io.on('connection', (socket) => {
 
     socket.join(user.room)
 
-    socket.emit('message', generateMessage('Admin','welcome'));
-    socket.broadcast.to(user.room).emit('message',generateMessage('Admin',`${user.username} has joined the chat !`))
+    let ciphertext = CryptoJS.AES.encrypt("Welcome", "436grdfgf5t45gr").toString();
+
+    socket.emit('message', generateMessage('Admin',ciphertext));
+    ciphertext = CryptoJS.AES.encrypt(`${user.username} has joined the chat !`, "436grdfgf5t45gr").toString();
+
+    socket.broadcast.to(user.room).emit('message',generateMessage('Admin',ciphertext))
     io.to(user.room).emit('roomData', {
       room: user.room,
       users: getUsersinRoom(user.room)
@@ -84,14 +89,13 @@ io.on('connection', (socket) => {
     if (filter.isProfane(decryptedMessage)) {
       return callback('Profanity is not allowed');
     }
-    io.to(user.room).emit('message',generateMessage(user.username,decryptedMessage));
+    io.to(user.room).emit('message',generateMessage(user.username,message));
     callback()
   })
 
   socket.on('sendLocation', (decryptedCoords,callback) => {
-    const coords = JSON.parse(CryptoJS.AES.decrypt(decryptedCoords, "436grdfgf5t45gr").toString(CryptoJS.enc.Utf8))
     const user = getuser(socket.id)
-    io.to(user.room).emit('locationMessage',generateLocationMessage(user.username,`https://google.com/maps?q=${coords.latitude},${coords.longitude}`))
+    io.to(user.room).emit('locationMessage',generateLocationMessage(user.username,decryptedCoords))
     callback()
   })
 
@@ -99,8 +103,11 @@ io.on('connection', (socket) => {
 
     const user = removeUser(socket.id)
 
-    if (user) {
-      io.to(user.room).emit('message',generateMessage('Admin',`${user.username} has left the chat`))
+    if (user) { 
+      const welcomeMessage = `${user.username} has left the chat`;
+      const ciphertext = CryptoJS.AES.encrypt(welcomeMessage, "436grdfgf5t45gr").toString();
+
+      io.to(user.room).emit('message',generateMessage('Admin',ciphertext))
       io.to(user.room).emit('roomData', {
         room: user.room,
         users: getUsersinRoom(user.room)
