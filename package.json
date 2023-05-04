@@ -19,7 +19,7 @@
     "express-rate-limit": "^6.4.0",
     "helmet": "^5.1.0",
     "hpp": "^0.2.3",
-    "socket.io": "^4.5.1",
+    "socket.io": "^4.6.0",
     "xss-clean": "^0.1.1"
   },
   "devDependencies": {
